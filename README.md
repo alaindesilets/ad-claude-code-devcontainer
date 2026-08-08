@@ -15,9 +15,17 @@ Details on the design of the container can be found further down this document.
 ### Using this template for a new project
 
 1. Copy `.devcontainer/` into the new project's root.
-2. Add a toolchain — see [Adding a toolchain](#adding-a-toolchain-eg-python)
+2. Set the project's name: in `.devcontainer/devcontainer.json`, change the
+   top-level `"name"` field from `"Claude Code sandbox (template)"` to
+   something identifying the new project (e.g. `"MyProject — Claude Code
+   sandbox"`). This is what VS Code shows in the bottom-left corner once
+   you're in the container — left as-is, every project copied from this
+   template looks identical there. (Optional: to also give the running
+   Docker container itself a fixed name instead of a random one like
+   `nervous_clarke`, add `"--name", "my-project"` to `runArgs`.)
+3. Add a toolchain — see [Adding a toolchain](#adding-a-toolchain-eg-python)
    below.
-3. Open the project folder in VS Code and reopen in container (see
+4. Open the project folder in VS Code and reopen in container (see
    [Opening this in VS Code](#opening-this-in-vs-code) below), or run
    `devcontainer up --workspace-folder .` via the
    [`@devcontainers/cli`](https://github.com/devcontainers/cli).
