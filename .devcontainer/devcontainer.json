@@ -1,0 +1,57 @@
+{
+  "name": "Claude Code sandbox (template)",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "TZ": "${localEnv:TZ:America/Toronto}"
+    }
+  },
+  "features": {
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+  },
+  "runArgs": [
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code",
+        "eamodio.gitlens"
+        // Add project-specific extensions here, e.g.:
+        // "ms-python.python",
+        // "fwcd.kotlin", "vscjava.vscode-gradle"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
+    "source=claude-code-config-${devcontainerId},target=/home/vscode/.claude,type=volume",
+    // Re-mount .devcontainer read-only, nested inside the (writable)
+    // workspace bind above. Without this, Claude running inside the
+    // container could edit devcontainer.json/Dockerfile/init-firewall.sh —
+    // no immediate effect, but a weakened config would silently take over
+    // on the next container rebuild. This only restricts writes through the
+    // container's mount point; the files are still normal, freely editable
+    // files on the host.
+    "source=${localWorkspaceFolder}/.devcontainer,target=/workspace/.devcontainer,type=bind,readonly"
+    // Add project-specific persistent caches here so they survive rebuilds,
+    // e.g.:
+    // "source=gradle-cache-${devcontainerId},target=/home/vscode/.gradle,type=volume",
+    // "source=npm-cache-${devcontainerId},target=/home/vscode/.npm,type=volume",
+    // "source=pip-cache-${devcontainerId},target=/home/vscode/.cache/pip,type=volume"
+    // If you add one, also chown its mount point in the Dockerfile — see
+    // the comment above the .claude chown line there.
+  ],
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+  "workspaceFolder": "/workspace",
+  "postStartCommand": "sudo /usr/local/bin/project-init-firewall.sh",
+  "waitFor": "postStartCommand"
+}
