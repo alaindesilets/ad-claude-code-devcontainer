@@ -4,6 +4,7 @@ Copy this to `AGENTS.md` at the project root, then customize the sections
 below (starting with "About PROJEX_X"). Also create a `CLAUDE.md` at the
 project root containing just:
 
+    <!-- This file just forwards to AGENTS.md; see that file for the actual instructions. -->
     @AGENTS.md
 
 (Claude Code reads `CLAUDE.md` specifically; the one-line import keeps a
@@ -81,6 +82,12 @@ appearance of the page or dialog.
   worth it).
 - If the user asks you to make a change that doesn't seem related to
   recent changes, ask if they want to first commit the previous changes.
+- If the user asks you to commit all, but the uncommitted change seem to pertain
+  to several different changes, then suggest doing it in several commits, if
+  possible.
+- Before doing a commit, make sure all tests are running. If you are unable to 
+  run all the tests (for example, because of some restrictions in your container)
+  then ask the human to run the tests.    
 - Commit messages should focus on the PURPOSE of the commit, not the HOW.
   If at all possible, write the message in terms an end user might
   recognize. For example, "First draft of an Android UI for the
