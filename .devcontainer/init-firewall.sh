@@ -86,9 +86,18 @@ done < <(echo "$gh_ranges" | jq -r '(.web + .api + .git)[]' | aggregate -q)
 
 # Resolve and add other allowed domains.
 # Add project-specific package-registry domains here, e.g.:
-#   Python:  pypi.org, files.pythonhosted.org
-#   JVM:     repo1.maven.org, repo.maven.apache.org, plugins.gradle.org,
-#            services.gradle.org, dl.google.com, maven.google.com
+#   Python:   pypi.org, files.pythonhosted.org
+#   JVM:      repo1.maven.org, repo.maven.apache.org, plugins.gradle.org,
+#             services.gradle.org
+#   Android:  dl.google.com, maven.google.com, androidx.dev (on top of the
+#             JVM domains above, since Gradle/Android builds need both)
+# Gotcha: domains behind a CDN/anycast front (dl.google.com, but this
+# applies to any Cloudflare/Fastly/Google-front-end-backed host) resolve
+# to edge IPs that can rotate mid-session. This loop resolves once, at
+# container start — if a build later fails with a *connection* error (not
+# a 404) to a domain that's supposedly allowlisted, that's usually why.
+# Fix: `sudo project-init-firewall.sh` again to refresh the IPs, before
+# assuming it's a real missing-dependency problem.
 for domain in \
     "registry.npmjs.org" \
     "api.anthropic.com" \

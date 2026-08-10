@@ -43,13 +43,43 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 #   && apt-get clean && rm -rf /var/lib/apt/lists/*
 # Add to init-firewall.sh: registry.npmjs.org (already in the base list below)
 #
-# JDK + Kotlin/Gradle (see the inuktitut-morpohological-analyzer project's
-# .devcontainer/Dockerfile for a full worked example, including Android SDK
-# setup and a gradle-cache named volume):
+# JDK + Kotlin/Gradle:
 # RUN apt-get update && apt-get install -y --no-install-recommends default-jdk \
 #   && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Or swap the FROM above for a JDK-preloaded base, e.g.
+# mcr.microsoft.com/devcontainers/java:21-bookworm.
 # Add to init-firewall.sh: repo1.maven.org, repo.maven.apache.org,
 # plugins.gradle.org, services.gradle.org
+# If the build needs a persistent Gradle cache, add a gradle-cache-${devcontainerId}
+# volume in devcontainer.json's "mounts" (see the commented example there) and
+# chown /home/vscode/.gradle below alongside .claude.
+#
+# Android (on top of the JDK setup above) — Google only ships cmdline-tools
+# as a zip, so `unzip` needs to be in the apt-get install list too:
+# ENV ANDROID_HOME=/opt/android-sdk
+# ENV ANDROID_SDK_ROOT=/opt/android-sdk
+# ENV PATH="${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${PATH}"
+# RUN mkdir -p "${ANDROID_HOME}/cmdline-tools" \
+#   && curl -fsSL -o /tmp/cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-15859902_latest.zip \
+#   && unzip -q /tmp/cmdline-tools.zip -d "${ANDROID_HOME}/cmdline-tools" \
+#   && mv "${ANDROID_HOME}/cmdline-tools/cmdline-tools" "${ANDROID_HOME}/cmdline-tools/latest" \
+#   && rm /tmp/cmdline-tools.zip \
+#   && chown -R vscode:vscode "${ANDROID_HOME}"
+# USER vscode
+# RUN yes | sdkmanager --licenses > /dev/null 2>&1 || true \
+#   && sdkmanager --install "platform-tools" "platforms;android-<N>" "build-tools;<N>.0.0"
+# USER root
+# (check compileSdk/build-tools versions against the project's build.gradle.kts —
+# don't guess them here)
+# Persist the SDK across rebuilds with an android-sdk-${devcontainerId} volume
+# mounted at /opt/android-sdk (see devcontainer.json), and chown it below too.
+# Add to init-firewall.sh: dl.google.com, maven.google.com, androidx.dev
+#
+# Apple Silicon + Android: Google's build tools (aapt2 in particular) are
+# x86_64-only. If builds fail with an exec-format error, force the whole
+# container to x86_64 via "options": ["--platform=linux/amd64"] in
+# devcontainer.json's "build" block (relies on Docker Desktop's "Use Rosetta
+# for x86/amd64 emulation on Apple Silicon" setting for reasonable speed).
 
 # Copy and set up the firewall script (see init-firewall.sh for the
 # allowlisted domains — extend the domain list there for whatever package
@@ -87,11 +117,10 @@ RUN mkdir -p /commandhistory && \
 # vscode user can't write its own login credentials into it after OAuth.
 #
 # If you add other persistent named-volume caches in devcontainer.json's
-# "mounts" (e.g. ~/.gradle, ~/.npm, ~/.cache/pip), give each one the same
-# treatment here — a volume mounted under a path the image didn't already
-# chown comes up root-owned and vscode can't write to it. This bit the
-# inuktitut-morpohological-analyzer project once for its Gradle cache;
-# don't repeat that mistake for the next project.
+# "mounts" (e.g. ~/.gradle, ~/.npm, ~/.cache/pip, /opt/android-sdk), give
+# each one the same treatment here — a volume mounted under a path the
+# image didn't already chown comes up root-owned and vscode can't write to
+# it.
 RUN mkdir -p /home/vscode/.claude && chown -R vscode:vscode /home/vscode/.claude
 
 USER vscode

@@ -1,0 +1,138 @@
+Template for a root AGENTS.md file.
+
+Copy this to `AGENTS.md` at the project root, then customize the sections
+below (starting with "About PROJEX_X"). Also create a `CLAUDE.md` at the
+project root containing just:
+
+    @AGENTS.md
+
+(Claude Code reads `CLAUDE.md` specifically; the one-line import keeps a
+single source of truth in `AGENTS.md` for tools that read that file
+instead.)
+
+---
+
+# About PROJEX_X
+
+Provide an overview of the project. What is it for?
+
+## Technical constraints
+
+- Describe the principal technical constraints for the project.
+- In particular, what OSes are to be supported (Windows, macOS, Linux,
+  iOS, Android)?
+- Should it run in a web browser? If so, which ones?
+
+## Architecture
+
+Provide an overview of the system architecture, citing specific paths in
+the source code that support/implement those architectural concepts.
+
+## Design and Coding Guidelines
+
+### Separate data, business logic, and presentation
+
+As much as possible, keep business logic independent of the visual
+appearance of the page or dialog.
+
+### Comments versus proper naming
+
+- Use comments sparingly.
+- If you feel the need to write a comment to explain the purpose of a
+  method, function, attribute, variable, see if changing the name might
+  not achieve the same clarity.
+- If you feel the need to write a comment to explain a section of a
+  function/method, see if you can achieve the same clarity by turning that
+  section into a function/method, and giving it a clear name.
+- Appropriate use of comments:
+  - Put a comment at the top of each package, file, class (compulsory).
+  - If a section of a function/method does something that is not clear,
+    and it is difficult to clarify that section by turning it into a
+    properly named function/method, then by all means, write a comment.
+  - If there is something non-obvious about the rationale for why a
+    particular section is written the way it is, then by all means, write
+    a comment.
+  - In HTML files, there is no clean way to give a clear "name" to a
+    section of markup. So by all means, use comments there to clarify
+    what the different sections correspond to and what they are used for.
+
+### Coding style
+
+- As much as possible, try to make each line fit inside of 80 characters.
+  - In particular for comments.
+
+## Preserving old data integrity
+
+- When you change the code, make sure that deploying it on an older
+  installation will preserve integrity of old data present in old
+  production versions.
+- In particular, make sure you access fields by their name, not their
+  position in the data schema.
+- If needed, write a conversion script that converts old data to the new
+  format, and make deployment of the new code invoke this conversion
+  script automatically. Don't introduce this conversion-script mechanism
+  prematurely — only do it the first time you see you actually need it.
+
+## Git History
+
+- Don't commit to git after every deployment to STAGING. Often, STAGING is
+  used to iterate quickly. Every once in a while, ask the human dev if
+  they think it's time to do a git commit (but only when you think it's
+  worth it).
+- If the user asks you to make a change that doesn't seem related to
+  recent changes, ask if they want to first commit the previous changes.
+- Commit messages should focus on the PURPOSE of the commit, not the HOW.
+  If at all possible, write the message in terms an end user might
+  recognize. For example, "First draft of an Android UI for the
+  morphological analyzer" is preferable to "Restructure into KMP modules,
+  add Android GUI" — the former says what changed from a user's
+  perspective; the latter describes implementation mechanics that are
+  already visible in the diff. If the implementation detail is worth
+  recording, put it in the commit body, not the subject line — the
+  subject stays purpose-focused, the body can explain the mechanics.
+
+## Testing
+
+- When writing tests, avoid explicitly referring to HTML/UI elements.
+  Instead, implement a Page Manipulator (or DialogManipulator) class with
+  helper methods that let tests manipulate the page/dialog and check
+  things about its current state. (Called a "Page Manipulator" rather
+  than the more standard "Page Object" — the latter sounds too much like
+  the model in an MVC pattern, which this isn't.)
+- Make sure to write automated or semi-automated tests for every new
+  behavior you code. When you fix a bug, start by writing a test that
+  fails because of that bug, then fix the bug — that way we're sure the
+  bug won't reappear later.
+- The human's role shifts from sole author of the code and tests to
+  curator of what the AI produces. Whenever you create or modify tests,
+  ask the human to scrutinize them carefully.
+
+## Instructions for AI coding agents
+
+### How to behave towards human devs
+
+- Don't be a sycophant. If you disagree with a decision being taken by a
+  human dev, say so.
+- But stay diplomatic.
+- And in the end, the human has the final word.
+- Before running a command that will prompt the human for approval,
+  explain WHY you want to run it (not just what it does) — enough for
+  them to make an informed decision, not just a mechanical description of
+  the command itself.
+
+### What language to use
+
+- Speak to the human dev in whatever language they prefer.
+- But all dev-facing text (code, comments, documentation) should be
+  written in English, irrespective of the language the app's UI uses to
+  speak to its own users. For example, the app's GUI may be French-only
+  and the dev may speak to you in French too, but the code itself should
+  still be written in English — English is the lingua franca of the
+  software development world.
+
+### Periodically write notes to your memory
+
+- If you've been working on a task for a long time and the code is in a
+  relatively stable state, write down some notes in your memory so you
+  can better pick up from there if you're ever interrupted (e.g. the
+  computer going to sleep).

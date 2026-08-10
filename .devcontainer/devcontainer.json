@@ -5,6 +5,11 @@
     "args": {
       "TZ": "${localEnv:TZ:America/Toronto}"
     }
+    // Android on Apple Silicon: Google's build tools (aapt2) are x86_64-only.
+    // Force the whole container to that architecture with:
+    // "options": ["--platform=linux/amd64"]
+    // (needs Docker Desktop's "Use Rosetta for x86/amd64 emulation on Apple
+    // Silicon" setting on for reasonable speed).
   },
   "features": {
     "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
@@ -20,7 +25,10 @@
         "eamodio.gitlens"
         // Add project-specific extensions here, e.g.:
         // "ms-python.python",
-        // "fwcd.kotlin", "vscjava.vscode-gradle"
+        // "fwcd.kotlin", "vscjava.vscode-gradle",
+        // "redhat.java", "vscjava.vscode-java-test" (JVM/Kotlin — the last
+        // two are what actually populate VS Code's Testing/flask panel;
+        // vscjava.vscode-gradle alone doesn't)
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash"
@@ -43,7 +51,8 @@
     // e.g.:
     // "source=gradle-cache-${devcontainerId},target=/home/vscode/.gradle,type=volume",
     // "source=npm-cache-${devcontainerId},target=/home/vscode/.npm,type=volume",
-    // "source=pip-cache-${devcontainerId},target=/home/vscode/.cache/pip,type=volume"
+    // "source=pip-cache-${devcontainerId},target=/home/vscode/.cache/pip,type=volume",
+    // "source=android-sdk-${devcontainerId},target=/opt/android-sdk,type=volume"
     // If you add one, also chown its mount point in the Dockerfile — see
     // the comment above the .claude chown line there.
   ],

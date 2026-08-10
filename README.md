@@ -119,7 +119,9 @@ correctly (or resolved to nothing at container start — check the
 
 Other toolchains follow the same two-file pattern; a few more are already
 sketched as comments in both files (Node/TypeScript beyond what the Claude
-Code feature installs, and a JVM/Gradle setup with Maven/Gradle domains).
+Code feature installs, a JVM/Gradle setup with Maven/Gradle domains, and —
+nested under that — an Android SDK setup with its own persistent-volume and
+Apple-Silicon notes).
 
 If the toolchain needs a persistent cache (e.g. `~/.gradle`, `~/.npm`), add a
 named volume for it in `devcontainer.json`'s `mounts`, and `chown` its mount
