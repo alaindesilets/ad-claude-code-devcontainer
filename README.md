@@ -23,9 +23,11 @@ Details on the design of the container can be found further down this document.
    template looks identical there. (Optional: to also give the running
    Docker container itself a fixed name instead of a random one like
    `nervous_clarke`, add `"--name", "my-project"` to `runArgs`.)
-3. Add a toolchain — see [Adding a toolchain](#adding-a-toolchain-eg-python)
+3. (Optional) Copy some VS Code settings from settings.json.template to the 
+   project's .vscode/settings.json
+4. Add a toolchain — see [Adding a toolchain](#adding-a-toolchain-eg-python)
    below.
-4. Open the project folder in VS Code and reopen in container (see
+5. Open the project folder in VS Code and reopen in container (see
    [Opening this in VS Code](#opening-this-in-vs-code) below), or run
    `devcontainer up --workspace-folder .` via the
    [`@devcontainers/cli`](https://github.com/devcontainers/cli).

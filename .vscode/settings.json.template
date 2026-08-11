@@ -1,0 +1,9 @@
+{
+  // Override the project name displayed by VS Code, when right clicking on 
+  // its icon. This will set it to 
+  //
+  //   PROJECT X (Docker container) - Current opened file
+  //
+  // Replace PROJEX_X with the project's name. 
+  "window.title": "PROJEX_X (Docker container)${separator}${activeEditorShort}"
+}
