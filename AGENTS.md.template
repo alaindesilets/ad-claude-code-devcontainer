@@ -24,6 +24,16 @@ Provide an overview of the project. What is it for?
   iOS, Android)?
 - Should it run in a web browser? If so, which ones?
 
+## Licensing issues
+
+- Describe the type of license this project is meant to be distributed under (
+  GPL, MIT, closed source, etc...) 
+- Instructions for devs and coding agents. Whenever you use a new dependendancy, 
+  make sure it is compatible with the projects licensing terms.
+- In particular, be wary of GPL dependencies, because they impose that the 
+  project be also distributed as GPL.
+
+
 ## Architecture
 
 Provide an overview of the system architecture, citing specific paths in
