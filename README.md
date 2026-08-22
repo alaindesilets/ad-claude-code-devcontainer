@@ -20,14 +20,22 @@ Details on the design of the container can be found further down this document.
    something identifying the new project (e.g. `"MyProject — Claude Code
    sandbox"`). This is what VS Code shows in the bottom-left corner once
    you're in the container — left as-is, every project copied from this
-   template looks identical there. (Optional: to also give the running
-   Docker container itself a fixed name instead of a random one like
-   `nervous_clarke`, add `"--name", "my-project"` to `runArgs`.)
-3. (Optional) Copy some VS Code settings from settings.json.template to the 
+   template looks identical there.
+3. Replace the `PROJECT_SLUG` placeholder in `.devcontainer/devcontainer.json`'s
+   `mounts` (search for it — a few lines, all together) with a short slug for
+   the project (e.g. `myproject`). This names the named Docker volumes that
+   hold Claude Code's config/auth and shell history. It needs to be done only
+   once, and — unlike the running container's own name, which is already
+   derived automatically per folder via `runArgs` — must stay identical
+   across every git worktree of this project, so they all share the same
+   Claude Code login and history. See
+   [Running multiple agents in parallel](#running-multiple-agents-in-parallel-git-worktrees)
+   below if that's not immediately obvious why.
+4. (Optional) Copy some VS Code settings from settings.json.template to the 
    project's .vscode/settings.json
-4. Add a toolchain — see [Adding a toolchain](#adding-a-toolchain-eg-python)
+5. Add a toolchain — see [Adding a toolchain](#adding-a-toolchain-eg-python)
    below.
-5. Open the project folder in VS Code and reopen in container (see
+6. Open the project folder in VS Code and reopen in container (see
    [Opening this in VS Code](#opening-this-in-vs-code) below), or run
    `devcontainer up --workspace-folder .` via the
    [`@devcontainers/cli`](https://github.com/devcontainers/cli).
@@ -58,6 +66,62 @@ Details on the design of the container can be found further down this document.
    **"Dev Container: Claude Code sandbox (template)"** instead of nothing.
 7. To leave the container and go back to working on your Mac directly,
    click that same bottom-left corner and choose **Reopen Folder Locally**.
+
+### Running multiple agents in parallel (git worktrees)
+
+Claude Code supports multiple simultaneous instances sharing the same
+`~/.claude` config, so you can run several agents in parallel on the same
+project, each on its own branch, each in its own container — as long as each
+one works in its own [git worktree](https://git-scm.com/docs/git-worktree)
+rather than all sharing one checkout. This template supports that pattern
+out of the box, with two caveats already accounted for above:
+
+- **Container names don't collide.** `runArgs` derives the container name
+  from the opened folder (`${localWorkspaceFolderBasename}-claude-sandbox`),
+  so each worktree gets a distinct container automatically.
+- **Config/history stay shared, not duplicated.** The `PROJECT_SLUG`-named
+  volumes (see step 3 above) are the same across every worktree, so you
+  don't have to re-authenticate Claude Code or lose shell history each time
+  you spin up a new worktree's container.
+
+What's *not* automatic is git itself working inside a worktree's container —
+see the next point — and telling worktree windows apart visually.
+
+**Workflow:**
+
+1. **Convention: keep worktrees as sibling folders of the main repo**, under
+   one common parent directory (e.g. `~/Documents/myproject`,
+   `~/Documents/myproject-feature-x`, `~/Documents/myproject-bugfix-y`).
+   The mount below assumes this layout.
+2. **One-time per project:** in `.devcontainer/devcontainer.json`'s
+   `mounts`, uncomment the git-worktree mount line near the bottom and
+   replace `MAIN_REPO_DIR_NAME` with the main repo's actual folder name.
+   This is needed because a worktree's `.git` is just a text file pointing
+   at an *absolute host path* inside the main repo's `.git` — invisible
+   inside the container, which only mounts the worktree's own folder, so
+   without this every git command in the worktree fails with `fatal: not a
+   git repository: (null)`. The mount makes that absolute path resolve
+   correctly inside the container too, no matter which worktree is open.
+   One mount line covers every worktree of the project — nothing to repeat
+   per worktree.
+3. **Create a worktree:** `git worktree add ../myproject-feature-x feature-x`
+   (from inside the main repo).
+4. **Open a new VS Code window** on that worktree's folder and **Reopen in
+   Container** (see [Opening this in VS Code](#opening-this-in-vs-code)
+   above) — this builds/starts a separate container for it.
+5. **(Optional) Tell the windows apart at a glance:** copy
+   `.vscode/settings.json.template` to that worktree's own
+   `.vscode/settings.json` if you haven't already, and uncomment/set a
+   different `workbench.colorCustomizations` title bar color for this
+   window than your other open worktrees.
+6. **Run `claude` in the integrated terminal** — it works side by side with
+   Claude Code instances running in your other worktrees/containers of the
+   same project, sharing config but isolated in every worktree's own
+   sandboxed container and branch.
+
+To remove a worktree once you're done with it: close its VS Code
+window/container, then from the main repo run
+`git worktree remove ../myproject-feature-x`.
 
 ### Adding a toolchain (e.g. Python)
 
@@ -156,8 +220,10 @@ docker exec -u vscode <container> sudo -l
 # -> only project-init-firewall.sh listed
 ```
 
-Docker assigns the running container a random name (e.g. `nervous_clarke`)
-unless one is pinned with `--name` in `devcontainer.json`'s `runArgs`.
+The container's name is pinned via `--name` in `devcontainer.json`'s
+`runArgs` (derived from the opened folder's name), so `docker ps` shows
+something identifiable instead of a random Docker-assigned name like
+`nervous_clarke`.
 
 ## Design
 

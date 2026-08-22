@@ -16,7 +16,13 @@
   },
   "runArgs": [
     "--cap-add=NET_ADMIN",
-    "--cap-add=NET_RAW"
+    "--cap-add=NET_RAW",
+    // Derive the container name from the opened folder rather than leaving
+    // it random. This also means each git worktree of this project (opened
+    // in its own VS Code window/container) gets its own uniquely-named
+    // container automatically, so they can run side by side without a name
+    // collision — Docker refuses two containers sharing one name.
+    "--name", "${localWorkspaceFolderBasename}-claude-sandbox"
   ],
   "customizations": {
     "vscode": {
@@ -37,8 +43,15 @@
   },
   "remoteUser": "vscode",
   "mounts": [
-    "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
-    "source=claude-code-config-${devcontainerId},target=/home/vscode/.claude,type=volume",
+    // Named with a fixed per-project slug (PROJECT_SLUG — replace this
+    // placeholder once per project, same as the "name" field above) rather
+    // than "-${devcontainerId}": devcontainerId is derived from the opened
+    // folder's path, so every git worktree would otherwise get its own
+    // separate volume and have to re-authenticate Claude Code / lose shell
+    // history. A fixed name means all worktrees of this project share one
+    // Claude config (auth, skills, settings) and one command history.
+    "source=PROJECT_SLUG-claude-code-bashhistory,target=/commandhistory,type=volume",
+    "source=PROJECT_SLUG-claude-code-config,target=/home/vscode/.claude,type=volume",
     // Re-mount .devcontainer read-only, nested inside the (writable)
     // workspace bind above. Without this, Claude running inside the
     // container could edit devcontainer.json/Dockerfile/init-firewall.sh —
@@ -49,12 +62,26 @@
     "source=${localWorkspaceFolder}/.devcontainer,target=/workspace/.devcontainer,type=bind,readonly"
     // Add project-specific persistent caches here so they survive rebuilds,
     // e.g.:
-    // "source=gradle-cache-${devcontainerId},target=/home/vscode/.gradle,type=volume",
-    // "source=npm-cache-${devcontainerId},target=/home/vscode/.npm,type=volume",
-    // "source=pip-cache-${devcontainerId},target=/home/vscode/.cache/pip,type=volume",
-    // "source=android-sdk-${devcontainerId},target=/opt/android-sdk,type=volume"
+    // "source=PROJECT_SLUG-gradle-cache,target=/home/vscode/.gradle,type=volume",
+    // "source=PROJECT_SLUG-npm-cache,target=/home/vscode/.npm,type=volume",
+    // "source=PROJECT_SLUG-pip-cache,target=/home/vscode/.cache/pip,type=volume",
+    // "source=PROJECT_SLUG-android-sdk,target=/opt/android-sdk,type=volume"
     // If you add one, also chown its mount point in the Dockerfile — see
     // the comment above the .claude chown line there.
+    //
+    // Running multiple agents in parallel via git worktrees (see the
+    // README section of the same name)? A worktree's .git is just a text
+    // file pointing at an absolute host path inside the MAIN repo's .git
+    // (e.g. "gitdir: /Users/you/Documents/my-project/.git/worktrees/wt1"),
+    // which isn't visible inside the container since only /workspace is
+    // mounted — every git command in the worktree fails with "fatal: not a
+    // git repository: (null)" otherwise. Fix: bind the main repo's .git
+    // into the container at that SAME absolute path, so git resolves it
+    // correctly regardless of which worktree is currently open. Uncomment
+    // and replace MAIN_REPO_DIR_NAME with the main repo's folder name (this
+    // assumes worktrees are created as sibling folders of the main repo,
+    // e.g. `git worktree add ../my-project-feature-x feature-x`):
+    // "source=${localWorkspaceFolder}/../MAIN_REPO_DIR_NAME/.git,target=${localWorkspaceFolder}/../MAIN_REPO_DIR_NAME/.git,type=bind,consistency=cached"
   ],
   "containerEnv": {
     "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"

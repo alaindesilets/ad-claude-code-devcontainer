@@ -1,9 +1,23 @@
 {
-  // Override the project name displayed by VS Code, when right clicking on 
-  // its icon. This will set it to 
+  // Override the project name displayed by VS Code, when right clicking on
+  // its icon. This will set it to
   //
   //   PROJECT X (Docker container) - Current opened file
   //
-  // Replace PROJEX_X with the project's name. 
+  // Replace PROJEX_X with the project's name.
   "window.title": "PROJEX_X (Docker container)${separator}${activeEditorShort}"
+
+  // Running multiple git worktrees of this project in parallel (see the
+  // README's "Running multiple agents in parallel" section)? Each worktree
+  // gets its own copy of .vscode/settings.json (it lives in the worktree's
+  // working tree, not the shared .git metadata) — uncomment
+  // "workbench.colorCustomizations" below and give each worktree's window a
+  // different titleBar color, so you can tell them apart at a glance. Only
+  // needed if colors ever look reused/identical across worktree windows.
+  //
+  // "workbench.colorCustomizations": {
+  //   "titleBar.activeBackground": "#1f4d7a",
+  //   "titleBar.activeForeground": "#ffffff",
+  //   "titleBar.inactiveBackground": "#16324f"
+  // }
 }

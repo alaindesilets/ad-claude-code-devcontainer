@@ -50,7 +50,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # mcr.microsoft.com/devcontainers/java:21-bookworm.
 # Add to init-firewall.sh: repo1.maven.org, repo.maven.apache.org,
 # plugins.gradle.org, services.gradle.org
-# If the build needs a persistent Gradle cache, add a gradle-cache-${devcontainerId}
+# If the build needs a persistent Gradle cache, add a PROJECT_SLUG-gradle-cache
 # volume in devcontainer.json's "mounts" (see the commented example there) and
 # chown /home/vscode/.gradle below alongside .claude.
 #
@@ -71,7 +71,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # USER root
 # (check compileSdk/build-tools versions against the project's build.gradle.kts —
 # don't guess them here)
-# Persist the SDK across rebuilds with an android-sdk-${devcontainerId} volume
+# Persist the SDK across rebuilds with a PROJECT_SLUG-android-sdk volume
 # mounted at /opt/android-sdk (see devcontainer.json), and chown it below too.
 # Add to init-firewall.sh: dl.google.com, maven.google.com, androidx.dev
 #
@@ -111,7 +111,7 @@ RUN mkdir -p /commandhistory && \
   touch /commandhistory/.bash_history && \
   chown -R vscode:vscode /commandhistory /home/vscode/.bashrc
 
-# claude-code-config-${devcontainerId} (devcontainer.json's "mounts") is
+# PROJECT_SLUG-claude-code-config (devcontainer.json's "mounts") is
 # seeded from whatever ownership this path has in the image at container
 # creation. Without this, the named volume comes up root-owned and the
 # vscode user can't write its own login credentials into it after OAuth.
